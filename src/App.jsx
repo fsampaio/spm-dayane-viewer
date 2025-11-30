@@ -4,7 +4,7 @@ import ProfileSheet from './components/ProfileSheet';
 import CategoryDetailModal from './components/CategoryDetailModal';
 import SummaryReport from './components/SummaryReport';
 import { getTScoreFromRaw } from './utils/scoring';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 
 function App() {
@@ -66,7 +66,7 @@ function App() {
       // If content is long, we might need multiple pages, but for now let's try fitting or simple scaling
       // A better approach for long content is to just add the image and let it scale to width
 
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfImgHeight);
+      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfImgHeight);
       pdf.save(`SPM_Relatorio.pdf`);
       console.log('PDF saved');
     } catch (error) {
