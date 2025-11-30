@@ -74,17 +74,27 @@ function App() {
 
         const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#ffffff' });
         const imgProps = pdf.getImageProperties(dataUrl);
-        const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-        // Check if image height is greater than page height
-        if (imgHeight > pdfHeight) {
-          // Scale to fit height if needed, or just let it spill (usually fit width is preferred)
-          // For this report, fitting width is standard, but if it's too long, it might be cut off.
-          // Given the sections, they should fit on A4.
-          pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, imgHeight);
-        } else {
-          pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, imgHeight);
-        }
+        // Calculate dimensions to fit within the page
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+
+        const widthRatio = pdfWidth / imgProps.width;
+        const heightRatio = pdfHeight / imgProps.height;
+
+        // Use the smaller ratio to ensure it fits both width and height
+        const ratio = Math.min(widthRatio, heightRatio);
+
+        const finalWidth = imgProps.width * ratio;
+        const finalHeight = imgProps.height * ratio;
+
+        // Center the image horizontally (and vertically if needed, but usually top-aligned is fine for reports)
+        // For this specific case, let's keep it top-aligned but ensure it fits.
+        // Actually, centering horizontally is good if height constrained.
+        const x = (pdfWidth - finalWidth) / 2;
+        const y = 0; // Top aligned
+
+        pdf.addImage(dataUrl, 'PNG', x, y, finalWidth, finalHeight);
       };
 
       console.log('Capturing Page 1: Input Form');
