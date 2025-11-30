@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@theme {
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-orange-500: #f97316;
+  --color-orange-600: #ea580c;
+  --color-green-500: #22c55e;
+  --color-green-50: #f0fdf4;
+  --color-green-100: #dcfce7;
+  --color-amber-500: #f59e0b;
+  --color-amber-50: #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-red-500: #ef4444;
+  --color-red-50: #fef2f2;
+  --color-red-100: #fee2e2;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+}
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+}
+
+@layer components {
+  .animate-fade-in-up {
+    animation: fadeInUp 0.3s ease-out forwards;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
