@@ -1,7 +1,7 @@
 import React from 'react';
 import { CATEGORIES, getInterpretiveRange } from '../utils/scoring';
 
-const SummaryReport = ({ tScores }) => {
+const SummaryReport = ({ tScores, title }) => {
     const dysfunction = [];
     const someProblems = [];
     const typical = [];
@@ -30,7 +30,7 @@ const SummaryReport = ({ tScores }) => {
 
     return (
         <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 mt-6">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Resumo Compreensivo do Perfil Sensorial</h2>
+            <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">{title || 'Resumo Compreensivo do Perfil Sensorial'}</h2>
 
             <div className="space-y-6">
                 <p className="text-gray-600 italic mb-4">

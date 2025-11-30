@@ -34,7 +34,7 @@ const ProfileSheet = ({ rawScores, tScores, onCategoryClick, formType = 'HOME' }
                     {CATEGORIES.map(cat => (
                         <div
                             key={cat.id}
-                            className="cursor-pointer hover:text-blue-600 transition-colors truncate"
+                            className="cursor-pointer hover:text-blue-600 transition-colors"
                             onClick={() => onCategoryClick(cat.id)}
                             title={cat.name}
                         >
