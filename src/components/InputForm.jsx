@@ -1,13 +1,7 @@
 import React from 'react';
 import { CATEGORIES } from '../utils/scoring';
 
-const InputForm = ({ rawScores, onScoreChange, formType }) => {
-    const [formData, setFormData] = React.useState({
-        name: '',
-        date: new Date().toLocaleDateString('pt-BR'), // Default to today DD/MM/YYYY
-        birthDate: ''
-    });
-
+const InputForm = ({ rawScores, onScoreChange, formType, formData, onFormChange }) => {
     const handleChange = (id, value) => {
         onScoreChange(id, parseInt(value) || 0);
     };
@@ -28,7 +22,7 @@ const InputForm = ({ rawScores, onScoreChange, formType }) => {
             newValue = formatDateString(value);
         }
 
-        setFormData({
+        onFormChange({
             ...formData,
             [name]: newValue
         });

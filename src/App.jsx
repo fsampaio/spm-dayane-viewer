@@ -11,7 +11,14 @@ function App() {
   const [rawScores, setRawScores] = useState({});
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [formType, setFormType] = useState('HOME'); // 'HOME' or 'CLASSROOM'
-  const contentRef = useRef(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    date: new Date().toLocaleDateString('pt-BR'),
+    birthDate: ''
+  });
+  const inputRef = useRef(null);
+  const profileRef = useRef(null);
+  const summaryRef = useRef(null);
 
   // Initialize with some default values (zeros)
   // The original useEffect for initializing rawScores is kept, but the provided snippet removes it.
@@ -34,6 +41,10 @@ function App() {
     }));
   };
 
+  const handleFormChange = (newFormData) => {
+    setFormData(newFormData);
+  };
+
   // Calculate T-Scores based on raw scores and selected form type
   const tScores = {};
   // The provided snippet changes the tScores calculation to iterate over Object.keys(rawScores).
@@ -46,29 +57,50 @@ function App() {
   });
 
   const handleExportPDF = async () => {
-    if (!contentRef.current) {
-      console.error('Content ref is null');
+    if (!inputRef.current || !profileRef.current || !summaryRef.current) {
+      console.error('One or more refs are null');
       return;
     }
 
     try {
       console.log('Starting PDF export with html-to-image...');
-
-      // Filter out elements that might cause issues if needed, but usually not required
-      const dataUrl = await toPng(contentRef.current, { cacheBust: true });
-
-      console.log('Image created');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const imgProps = pdf.getImageProperties(dataUrl);
-      const pdfImgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const pdfHeight = pdf.internal.pageSize.getHeight();
 
-      // If content is long, we might need multiple pages, but for now let's try fitting or simple scaling
-      // A better approach for long content is to just add the image and let it scale to width
+      // Helper to add image to PDF
+      const addToPdf = async (element, isFirstPage = false) => {
+        if (!isFirstPage) pdf.addPage();
 
-      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfImgHeight);
-      pdf.save(`SPM_Relatorio.pdf`);
-      console.log('PDF saved');
+        const dataUrl = await toPng(element, { cacheBust: true, backgroundColor: '#ffffff' });
+        const imgProps = pdf.getImageProperties(dataUrl);
+        const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        // Check if image height is greater than page height
+        if (imgHeight > pdfHeight) {
+          // Scale to fit height if needed, or just let it spill (usually fit width is preferred)
+          // For this report, fitting width is standard, but if it's too long, it might be cut off.
+          // Given the sections, they should fit on A4.
+          pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, imgHeight);
+        } else {
+          pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, imgHeight);
+        }
+      };
+
+      console.log('Capturing Page 1: Input Form');
+      await addToPdf(inputRef.current, true);
+
+      console.log('Capturing Page 2: Profile Sheet');
+      await addToPdf(profileRef.current);
+
+      console.log('Capturing Page 3: Summary');
+      await addToPdf(summaryRef.current);
+
+      const safeName = formData.name ? formData.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'relatorio';
+      const filename = `SPM_${safeName}.pdf`;
+
+      pdf.save(filename);
+      console.log(`PDF saved as ${filename}`);
     } catch (error) {
       console.error('PDF Export Error:', error);
       alert('Erro ao exportar PDF. Verifique o console para mais detalhes.');
@@ -122,10 +154,10 @@ function App() {
         </div>
       </header>
 
-      <main ref={contentRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col gap-8">
           {/* Top Section: Input Form */}
-          <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <section ref={inputRef} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div className={`h-2 w-full ${formType === 'HOME' ? 'bg-blue-500' : 'bg-orange-500'}`}></div>
             <div className="p-6">
               <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
@@ -136,13 +168,15 @@ function App() {
                 rawScores={rawScores}
                 onScoreChange={handleScoreChange}
                 formType={formType}
+                formData={formData}
+                onFormChange={handleFormChange}
               />
             </div>
           </section>
 
           {/* Bottom Section: Profile Sheet & Summary */}
           <div className="space-y-8">
-            <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <section ref={profileRef} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-6 overflow-x-auto">
                 <ProfileSheet
                   rawScores={rawScores}
@@ -153,7 +187,9 @@ function App() {
               </div>
             </section>
 
-            <SummaryReport tScores={tScores} />
+            <div ref={summaryRef}>
+              <SummaryReport tScores={tScores} />
+            </div>
           </div>
         </div>
       </main>
